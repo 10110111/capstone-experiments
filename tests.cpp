@@ -11,23 +11,44 @@ namespace capstone
 #include <capstone/capstone.h>
 }
 
+std::string location;
+
+char skipws(std::istringstream& in)
+{
+    char c;
+    while((c=in.get())==' ');
+    return c;
+}
+
 std::vector<uint8_t> readBytes(std::istringstream& in)
 {
-    unsigned int c;
+    std::string err("failed to parse instruction bytes: error ");
+    char high=skipws(in);
+    if(!in) throw err+"1"; // something must be present
     std::vector<uint8_t> bytes;
-    auto flagsBackup(in.flags());
-    in >> std::noskipws;
-    while(in >> c)
+    while(true)
     {
-        if(c>0xff)
-            throw "failed to parse instruction bytes";
-        bytes.push_back(c);
+        char low=in.get();
+        if(!in) throw err+"2"; // second nibble must be present
+        if(std::isspace(low)) throw err+"3";
+        std::string str{high,low};
+        std::stringstream ss(str);
+        unsigned int value;
+        ss >> std::hex >> value;
+        if(!ss) throw err+"4";
+        bytes.push_back(value);
         char separator=in.get();
-        if(separator!=' ' && separator!='\t')
-            throw "failed to parse instruction bytes";
-        if(separator=='\t') break;
+        if(in.eof()) break;
+        if(!in) throw err+"5";
+        if(separator!=' ') throw err+"6";
+        if(separator==' ')
+        {
+            high=in.get();
+            if(in.eof()) break;
+            if(!in) throw err+"7";
+            if(high==' ') break; // second space ends sequence
+        }
     }
-    in.flags(flagsBackup);
     return bytes;
 }
 
@@ -42,18 +63,92 @@ std::string formatBytes(const std::vector<uint8_t>& bytes)
     return string.pop_back(),string;
 }
 
-std::string formatPosition(std::istringstream& in)
+void readSyntaxAndBitness(std::istringstream& in, capstone::cs_mode& mode, capstone::cs_opt_value& syntax)
 {
-    std::size_t col=in.tellg();
-    if(!in) return "(error getting position of error)\n";
-    if(col>=2) col-=2; // so that the arrow shows previous token instead of the next one
-    return std::string(col,' ') + "^\n";
+    std::string syntaxString;
+    std::getline(in,syntaxString,':');
+    if(syntaxString=="Intel16")
+    {
+        mode=capstone::CS_MODE_16;
+        syntax=capstone::CS_OPT_SYNTAX_INTEL;
+    }
+    else if(syntaxString=="Intel32")
+    {
+        mode=capstone::CS_MODE_32;
+        syntax=capstone::CS_OPT_SYNTAX_INTEL;
+    }
+    else if(syntaxString=="Intel64")
+    {
+        mode=capstone::CS_MODE_64;
+        syntax=capstone::CS_OPT_SYNTAX_INTEL;
+    }
+    else if(syntaxString=="AT&T16 ")
+    {
+        mode=capstone::CS_MODE_16;
+        syntax=capstone::CS_OPT_SYNTAX_ATT;
+    }
+    else if(syntaxString=="AT&T32 ")
+    {
+        mode=capstone::CS_MODE_32;
+        syntax=capstone::CS_OPT_SYNTAX_ATT;
+    }
+    else if(syntaxString=="AT&T64 ")
+    {
+        mode=capstone::CS_MODE_64;
+        syntax=capstone::CS_OPT_SYNTAX_ATT;
+    }
+    else
+    {
+        std::ostringstream error;
+        error << location << "error: failed to parse bitness and syntax token\n";
+        throw error.str();
+    }
+}
+
+uint64_t readAddress(std::istringstream& in)
+{
+    uint64_t address;
+    in >> std::hex >> address;
+    if(!in)
+    {
+        std::ostringstream error;
+        error << location << "error: failed to parse address\n";
+        throw error.str();
+    }
+    if(in.get()!=':')
+    {
+        std::ostringstream error;
+        error << location << "error: expected colon after address. Address found was " << std::hex << address << "\n";
+        throw error.str();
+    }
+    return address;
+}
+
+capstone::cs_insn* disassemble(const capstone::csh csh, std::vector<uint8_t> bytes, uint64_t address)
+{
+    capstone::cs_insn *insn;
+    if(!capstone::cs_disasm(csh, bytes.data(), bytes.size(), address, 1, &insn))
+    {
+        std::ostringstream error;
+        error << location << "error: failed to disassemble instruction\n";
+    }
+    return insn;
+}
+
+std::string readInstructionString(std::istringstream& in)
+{
+    std::string str;
+    skipws(in);
+    in.seekg(-1,std::ios_base::cur);
+    std::getline(in,str,';');
+    while(str.back()==' ') str.pop_back();
+    if(str.empty()) throw std::string("Failed to read instruction string");
+    return str;
 }
 
 int main(int argc, char** argv)
 {
     capstone::csh csh;
-    capstone::cs_insn *insn;
     if(argc<2)
     {
         std::cerr << "Usage: " << argv[0] << " filename\n";
@@ -75,7 +170,7 @@ int main(int argc, char** argv)
    
     while(std::getline(file,line))
     {
-        std::string location=std::string(filename)+":"+std::to_string(++lineNum)+": ";
+        location=std::string(filename)+":"+std::to_string(++lineNum)+": ";
         if(line[0]=='#')
             continue;
         if(line.size()==0)
@@ -85,45 +180,7 @@ int main(int argc, char** argv)
             capstone::cs_mode mode;
             capstone::cs_opt_value syntax;
             std::istringstream in(line);
-            std::replace(line.begin(),line.end(),'\t',' '); // for output
-            std::string syntaxString;
-            std::getline(in,syntaxString,':');
-            if(syntaxString=="Intel16")
-            {
-                mode=capstone::CS_MODE_16;
-                syntax=capstone::CS_OPT_SYNTAX_INTEL;
-            }
-            else if(syntaxString=="Intel32")
-            {
-                mode=capstone::CS_MODE_32;
-                syntax=capstone::CS_OPT_SYNTAX_INTEL;
-            }
-            else if(syntaxString=="Intel64")
-            {
-                mode=capstone::CS_MODE_64;
-                syntax=capstone::CS_OPT_SYNTAX_INTEL;
-            }
-            else if(syntaxString=="AT&T16 ")
-            {
-                mode=capstone::CS_MODE_16;
-                syntax=capstone::CS_OPT_SYNTAX_ATT;
-            }
-            else if(syntaxString=="AT&T32 ")
-            {
-                mode=capstone::CS_MODE_32;
-                syntax=capstone::CS_OPT_SYNTAX_ATT;
-            }
-            else if(syntaxString=="AT&T64 ")
-            {
-                mode=capstone::CS_MODE_64;
-                syntax=capstone::CS_OPT_SYNTAX_ATT;
-            }
-            else
-            {
-                std::cerr << location << "error: failed to parse bitness and syntax token\n";
-                return 3;
-            }
-
+            readSyntaxAndBitness(in,mode,syntax);
             if (capstone::cs_open(capstone::CS_ARCH_X86, mode, &csh) != capstone::CS_ERR_OK)
             {
                 std::cerr << "cs_open failed\n";
@@ -131,32 +188,18 @@ int main(int argc, char** argv)
             }
             capstone::cs_option(csh, capstone::CS_OPT_SYNTAX, syntax);
             capstone::cs_option(csh, capstone::CS_OPT_DETAIL, capstone::CS_OPT_ON);
-            uint64_t address;
-            in >> std::hex >> address;
-            if(!in)
-            {
-                std::cerr << location << "error: failed to parse address\n";
-                return 4;
-            }
-            if(in.get()!=':')
-            {
-                std::cerr << location << "error: expected colon after address. Address found was " << std::hex << address << "\n";
-                return 5;
-            }
-            if(in.get()!=' ')
-            {
-                std::cerr << location << "error: address must be followed by colon and single space\n";
-                return 6;
-            }
+            uint64_t address=readAddress(in);
             std::vector<uint8_t> bytes=readBytes(in);
-            if(!capstone::cs_disasm(csh, bytes.data(), bytes.size(), address, 1, &insn))
+            std::string expectedInsnString=readInstructionString(in);
+            capstone::cs_insn *insn;
+            try { insn=disassemble(csh,bytes,address); }
+            catch(const std::string& error)
             {
-                std::cerr << location << "error: failed to disassemble instruction\n";
-                std::cerr << line << "\n";
-                std::cerr << formatPosition(in);
+                std::cerr << error;
                 ++errorCount;
+                continue;
             }
-            if(insn->size<bytes.size())
+            if(insn->size < bytes.size())
             {
                 std::cerr << location << "error: extra " << bytes.size()-insn->size << " bytes after instruction\n";
                 std::cerr << line << "\n";
@@ -164,13 +207,6 @@ int main(int argc, char** argv)
                 continue;
             }
 
-            std::string expectedInsnString;
-            std::getline(in,expectedInsnString,'\t');
-            if(in.eof())
-            {
-                std::cerr << location << "error: unexpected end of file\n";
-                return 7;
-            }
             std::string actualInsnString=std::string(insn->mnemonic)+" "+insn->op_str;
             if(expectedInsnString!=actualInsnString)
             {
@@ -181,7 +217,7 @@ int main(int argc, char** argv)
                 ++errorCount;
             }
 
-            std::size_t operandCount=insn->detail->x86.op_count;
+/*            std::size_t operandCount=insn->detail->x86.op_count;
             std::vector<capstone::x86_op_type> opTypes;
             std::vector<std::size_t> opSizes;
             bool opTypeFailure=false;
@@ -245,13 +281,13 @@ int main(int argc, char** argv)
                 }
             }
             else ++errorCount;
-
+*/
             ++testCount;
 
             capstone::cs_free(insn, 1);
             capstone::cs_close(&csh);
         }
-        catch(const char* error)
+        catch(const std::string& error)
         {
             std::cerr << location << error << "\n";
             return 127;
