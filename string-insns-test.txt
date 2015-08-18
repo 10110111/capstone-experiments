@@ -1,0 +1,78 @@
+# INS
+Intel16: 0xffe1:       f3 6c        rep insb byte ptr es:[di], dx
+Intel16: 0xffe1:       f3 6d        rep insw word ptr es:[di], dx
+Intel16: 0xffe1:       67 f3 6c     rep insb byte ptr es:[edi], dx
+Intel16: 0xffe1:       66 f3 6d     rep insd dword ptr es:[di], dx
+Intel16: 0xffe1:       67 f3 6d     rep insw word ptr es:[edi], dx
+Intel16: 0xffe1:       67 66 f3 6d  rep insd dword ptr es:[edi], dx
+# OUTS
+Intel16: 0xffe1:       f3 6e        rep outsb dx, byte ptr es:[di]
+Intel16: 0xffe1:       f3 6f        rep outsw dx, word ptr es:[di]
+Intel16: 0xffe1:       67 f3 6e     rep outsb dx, byte ptr es:[edi]
+Intel16: 0xffe1:       66 f3 6f     rep outsd dx, dword ptr es:[di]
+Intel16: 0xffe1:       67 f3 6f     rep outsw dx, word ptr es:[edi]
+Intel16: 0xffe1:       67 66 f3 6f  rep outsd dx, dword ptr es:[edi]
+# LODS
+Intel16: 0xffe1:       f3 ac        rep lodsb al, byte ptr [si]
+Intel16: 0xffe1:       f3 ad        rep lodsw ax, word ptr [si]
+Intel16: 0xffe1:       67 f3 ac     rep lodsb al, byte ptr [esi]
+Intel16: 0xffe1:       66 f3 ad     rep lodsd eax, dword ptr [si]
+Intel16: 0xffe1:       67 f3 ad     rep lodsw ax, word ptr [esi]
+Intel16: 0xffe1:       67 66 f3 ad  rep lodsd eax, dword ptr [esi]
+Intel16: 0xffe1:       36 f3 ac        rep lodsb al, byte ptr ss:[si]
+Intel16: 0xffe1:       36 f3 ad        rep lodsw ax, word ptr ss:[si]
+Intel16: 0xffe1:       36 67 f3 ac     rep lodsb al, byte ptr ss:[esi]
+Intel16: 0xffe1:       36 66 f3 ad     rep lodsd eax, dword ptr ss:[si]
+Intel16: 0xffe1:       36 67 f3 ad     rep lodsw ax, word ptr ss:[esi]
+Intel16: 0xffe1:       36 67 66 f3 ad  rep lodsd eax, dword ptr ss:[esi]
+# STOS
+Intel16: 0xffe1:       f3 aa        rep stosb byte ptr es:[di], al
+Intel16: 0xffe1:       f3 ab        rep stosw word ptr es:[di], ax
+Intel16: 0xffe1:       67 f3 aa     rep stosb byte ptr es:[edi], al
+Intel16: 0xffe1:       66 f3 ab     rep stosd dword ptr es:[di], eax
+Intel16: 0xffe1:       67 f3 ab     rep stosw word ptr es:[edi], ax
+Intel16: 0xffe1:       67 66 f3 ab  rep stosd dword ptr es:[edi], eax
+# MOVS
+Intel16: 0xffe1:       f3 a4        rep movsb byte ptr es:[di], byte ptr [si]
+Intel16: 0xffe1:       f3 a5        rep movsw word ptr es:[di], word ptr [si]
+Intel16: 0xffe1:       67 f3 a4     rep movsb byte ptr es:[edi], byte ptr [esi]
+Intel16: 0xffe1:       66 f3 a5     rep movsd dword ptr es:[di], dword ptr [si]
+Intel16: 0xffe1:       67 f3 a5     rep movsw word ptr es:[edi], word ptr [esi]
+Intel16: 0xffe1:       67 66 f3 a5  rep movsd dword ptr es:[edi], dword ptr [esi]
+Intel16: 0xffe1:       64 f3 a4        rep movsb byte ptr es:[di], byte ptr fs:[si]
+Intel16: 0xffe1:       64 f3 a5        rep movsw word ptr es:[di], word ptr fs:[si]
+Intel16: 0xffe1:       64 67 f3 a4     rep movsb byte ptr es:[edi], byte ptr fs:[esi]
+Intel16: 0xffe1:       64 66 f3 a5     rep movsd dword ptr es:[di], dword ptr fs:[si]
+Intel16: 0xffe1:       64 67 f3 a5     rep movsw word ptr es:[edi], word ptr fs:[esi]
+Intel16: 0xffe1:       64 67 66 f3 a5  rep movsd dword ptr es:[edi], dword ptr fs:[esi]
+# CMPS
+Intel16: 0xffe1:       f3 a6        repe cmpsb byte ptr [si], byte ptr es:[di]
+Intel16: 0xffe1:       f3 a7        repe cmpsw word ptr [si], word ptr es:[di]
+Intel16: 0xffe1:       67 f3 a6     repe cmpsb byte ptr [esi], byte ptr es:[edi]
+Intel16: 0xffe1:       66 f3 a7     repe cmpsd dword ptr [si], dword ptr es:[di]
+Intel16: 0xffe1:       67 f3 a7     repe cmpsw word ptr [esi], word ptr es:[edi]
+Intel16: 0xffe1:       67 66 f3 a7  repe cmpsd dword ptr [esi], dword ptr es:[edi]
+# SCAS
+Intel16: 0xffe1:       f3 ae        repe scasb byte ptr es:[di]
+Intel16: 0xffe1:       f3 af        repe scasw word ptr es:[di]
+Intel16: 0xffe1:       67 f3 ae     repe scasb byte ptr es:[edi]
+Intel16: 0xffe1:       66 f3 af     repe scasd dword ptr es:[di]
+Intel16: 0xffe1:       67 f3 af     repe scasw word ptr es:[edi]
+Intel16: 0xffe1:       67 66 f3 af  repe scasd dword ptr es:[edi]
+
+
+Intel32: 0x9123ffe1:   f3 6c        rep insb byte ptr es:[edi], dx
+Intel32: 0x9123ffe1:   f3 6d        rep insd dword ptr es:[edi], dx
+Intel32: 0x9123ffe1:   67 f3 6c     rep insb byte ptr es:[di], dx
+Intel32: 0x9123ffe1:   66 f3 6d     rep insw word ptr es:[edi], dx
+Intel32: 0x9123ffe1:   67 f3 6d     rep insd dword ptr es:[di], dx
+Intel32: 0x9123ffe1:   67 66 f3 6d  rep insw word ptr es:[di], dx
+
+
+# FIXME: in 64 bit mode REX.W, 66 and 67 prefixes affect unintuitively *CX, *SI & *DI!
+Intel64: 0x649123ffe1:   f3 6c        rep insb byte ptr [edi], dx
+Intel64: 0x649123ffe1:   f3 6d        rep insd dword ptr [edi], dx
+Intel64: 0x649123ffe1:   67 f3 6c     rep insb byte ptr [edi], dx
+Intel64: 0x649123ffe1:   66 f3 6d     rep insw word ptr [edi], dx
+Intel64: 0x649123ffe1:   67 f3 6d     rep insd dword ptr [edi], dx
+Intel64: 0x649123ffe1:   67 66 f3 6d  rep insw word ptr [edi], dx
