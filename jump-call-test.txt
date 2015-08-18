@@ -1,11 +1,11 @@
 #SyntaxBITS:[ ]*Address:[ ]*RawBytes[ ]{2,}Disassembly([ ]*;[ ]*Operands:[ ]*opaSIZE(=VALUE)?([ ]opbSIZE(=VALUE)?([ ]opcSIZE(=VALUE)?)?)?([ ]{2,}Prefixes: pfx1([ ]pfx2([ ]+pfx3([ ]pfx4)?)?)?
-Intel64: 0x649123ffe1: E8 35 64 93 53                   call 0x64e4b7641b               ;imm64
-Intel64: 0x649123ffe1: B8 12 34 64 f3                   mov eax, 0xf3643412             ;reg32 imm32
-Intel64: 0x649123ffe1: 40 B8 12 34 64 f3                mov eax, 0xf3643412             ;reg64 imm64
-Intel64: 0x649123ffe1: 48 C7 C0 13 57 41 D8             mov rax, -0x27bea8ed            ;reg64 imm64
-AT&T64 : 0x649123ffe1: B8 12 34 64 f3                   movl $0xf3643412, %eax          ;imm32 reg32
-Intel64: 0x649123ffe1: 48 B8 12 34 64 f3 23 f8 e5 cf    movabs rax, 0xcfe5f823f3643412             ;reg64 imm64
-Intel64: 0x649123ffe1: 48 A1 12 34 64 f3 23 f8 e5 cf    movabs rax, qword ptr [0xcfe5f823f3643412] ;reg64 imm64
+#Intel64: 0x649123ffe1: E8 35 64 93 53                   call 0x64e4b7641b               ;imm64=0x64e4b7641b
+#Intel64: 0x649123ffe1: B8 12 34 64 f3                   mov eax, 0xf3643412             ;reg32=eax, imm32=0xf3643412
+Intel64: 0x649123ffe1: 40 B8 12 34 64 f3                mov eax, 0xf3643412             ;reg32,imm32
+Intel64: 0x649123ffe1: 48 C7 C0 13 57 41 D8             mov rax, -0x27bea8ed            ;reg64,imm64
+AT&T64 : 0x649123ffe1: B8 12 34 64 f3                   movl $0xf3643412, %eax          ;imm32,reg32
+Intel64: 0x649123ffe1: 48 B8 12 34 64 f3 23 f8 e5 cf    movabs rax, 0xcfe5f823f3643412             ;reg64,imm64
+Intel64: 0x649123ffe1: 48 A1 12 34 64 f3 23 f8 e5 cf    movabs rax, qword ptr [0xcfe5f823f3643412] ;reg64,mem64
 
 Intel16: 0xffe1: e8 35 64               call 0x6419        ; imm16
 Intel16: 0xffe1: 66 e8 35 64 93 53      call 0x5394641c    ; imm32

@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <vector>
 #include <algorithm>
+#include <utility>
 
 namespace capstone
 {
@@ -16,7 +17,7 @@ std::string location;
 char skipws(std::istringstream& in)
 {
     char c;
-    while((c=in.get())==' ');
+    while(in && (c=in.get())==' ');
     return c;
 }
 
@@ -146,6 +147,68 @@ std::string readInstructionString(std::istringstream& in)
     return str;
 }
 
+std::string formatPosition(std::istringstream& in, std::ptrdiff_t offset=0)
+{
+    std::size_t col=in.tellg();
+    if(col==std::size_t(-1)) col=in.str().size();
+    return std::string(col+offset-1,' ') + "^\n";
+}
+
+std::vector<std::pair<capstone::x86_op_type,std::size_t>> readOperands(std::istringstream& in)
+{
+    skipws(in);
+    in.seekg(-1,std::ios_base::cur);
+    std::vector<std::pair<capstone::x86_op_type,std::size_t>> operands;
+    for(std::size_t opN=0;!in.eof();++opN)
+    {
+        std::string operandStr;
+        std::getline(in,operandStr,',');
+        std::string typeStr(operandStr,0,3);
+        capstone::x86_op_type type=capstone::X86_OP_INVALID;
+             if(typeStr=="mem") type=capstone::X86_OP_MEM;
+        else if(typeStr=="reg") type=capstone::X86_OP_REG;
+        else if(typeStr=="imm") type=capstone::X86_OP_IMM;
+        else
+        {
+            std::ostringstream error;
+            error << location << "error: failed to parse operand " << opN+1 << " type\n";
+            error << in.str() << "\n";
+            error << formatPosition(in,-operandStr.size());
+            throw error.str();
+        }
+        std::string sizeStr(operandStr,3);
+        std::istringstream ss(sizeStr);
+        std::size_t size;
+        ss >> size;
+        if(ss.fail() || size%8)
+        {
+            std::ostringstream error;
+            error << location << "error: failed to parse operand " << opN+1 << " size\n";
+            error << in.str() << "\n";
+            error << formatPosition(in,-operandStr.size()+3);
+            throw error.str();
+        }
+        operands.push_back(std::make_pair(type,size/8));
+    }
+    return operands;
+}
+
+std::string formatOperandTypeSize(const std::pair<capstone::x86_op_type,std::size_t>& operand)
+{
+    const capstone::x86_op_type type=operand.first;
+    std::size_t size=operand.second;
+    std::string str;
+
+    if(type==capstone::X86_OP_INVALID) str="invalid";
+    else if(type==capstone::X86_OP_MEM)str="mem";
+    else if(type==capstone::X86_OP_REG)str="reg";
+    else if(type==capstone::X86_OP_IMM)str="imm";
+    else if(type==capstone::X86_OP_FP) str="fp";
+    else str="(bad="+std::to_string(type)+")";
+
+    return str+std::to_string(8*size);
+}
+
 int main(int argc, char** argv)
 {
     capstone::csh csh;
@@ -217,71 +280,31 @@ int main(int argc, char** argv)
                 ++errorCount;
             }
 
-/*            std::size_t operandCount=insn->detail->x86.op_count;
-            std::vector<capstone::x86_op_type> opTypes;
-            std::vector<std::size_t> opSizes;
-            bool opTypeFailure=false;
-            for(std::size_t opN=0;opN<operandCount;++opN)
+            auto operands=readOperands(in);
+            std::size_t operandCount=insn->detail->x86.op_count;
+            if(operands.size()!=insn->detail->x86.op_count)
             {
-                std::string opTypeStr;
-                std::getline(in,opTypeStr,' ');
-                std::string opClass(opTypeStr,0,3);
-                capstone::x86_op_type type(capstone::X86_OP_INVALID);
-                if(opClass=="imm")
-                    type=capstone::X86_OP_IMM;
-                else if(opClass=="reg")
-                    type=capstone::X86_OP_REG;
-                else if(opClass=="mem")
-                    type=capstone::X86_OP_MEM;
-                else
-                {
-                    std::cerr << location << "error: failed to parse operand " << opN+1 << " type\n";
-                    std::cerr << line << "\n";
-                    std::cerr << formatPosition(in);
-                    opTypeFailure=true;
-                    break;
-                }
-                opTypes.push_back(type);
-                std::string opSize(opTypeStr,3);
-                std::istringstream opSizeStr(opSize);
-                std::size_t size;
-                opSizeStr >> size;
-                if(!opSizeStr || size%8)
-                {
-                    std::cerr << location << "error: failed to parse operand " << opN+1 << " size\n";
-                    std::cerr << line << "\n";
-                    std::cerr << formatPosition(in);
-                    opTypeFailure=true;
-                    break;
-                }
-                opSizes.push_back(size/8);
+                std::cerr << location << "expected " << operands.size() << " operands, capstone returned " << operandCount << "\n";
+                std::cerr << line << "\n";
+                std::cerr << formatPosition(in);
+                ++errorCount;
             }
-            if(!opTypeFailure)
+            for(std::size_t i=0;i<operandCount;++i)
             {
-                if(opSizes.size()!=opTypes.size())
+                if(operands[i].first!=insn->detail->x86.operands[i].type)
                 {
-                    std::cerr << location << "error: internal parser error\n";
-                    return -4;
-                }
-                if(opSizes.size()!=insn->detail->x86.op_count)
-                {
-                    std::cerr << location << "expected " << opSizes.size() << " operands, capstone returned " << insn->detail->x86.op_count << "\n";
+                    std::cerr << location << "error: operand #" << i+1 << ": expected type " << formatOperandTypeSize(operands[i]) << " capstone returned " << formatOperandTypeSize(std::make_pair(insn->detail->x86.operands[i].type,insn->detail->x86.operands[i].size))<< "\n";
                     std::cerr << line << "\n";
-                    std::cerr << formatPosition(in);
                     ++errorCount;
                 }
-                for(std::size_t i=0;i<insn->detail->x86.op_count;++i)
+                if(operands[i].second!=insn->detail->x86.operands[i].size)
                 {
-                    if(opSizes[i]!=insn->detail->x86.operands[i].size)
-                    {
-                        std::cerr << location << "error: operand #" << i+1 << ": expected size " << 8*opSizes[i] << " bit, capstone returned " << 8*insn->detail->x86.operands[i].size << " bit\n";
-                        std::cerr << line << "\n";
-                        ++errorCount;
-                    }
+                    std::cerr << location << "error: operand #" << i+1 << ": expected size " << 8*operands[i].second << " bit, capstone returned " << 8*insn->detail->x86.operands[i].size << " bit\n";
+                    std::cerr << line << "\n";
+                    ++errorCount;
                 }
             }
-            else ++errorCount;
-*/
+
             ++testCount;
 
             capstone::cs_free(insn, 1);
