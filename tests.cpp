@@ -157,6 +157,7 @@ std::string formatPosition(std::istringstream& in, std::ptrdiff_t offset=0)
 std::vector<std::pair<capstone::x86_op_type,std::size_t>> readOperands(std::istringstream& in)
 {
     skipws(in);
+    if(in.eof()) return {std::make_pair(capstone::X86_OP_INVALID,0)};
     in.seekg(-1,std::ios_base::cur);
     std::vector<std::pair<capstone::x86_op_type,std::size_t>> operands;
     for(std::size_t opN=0;!in.eof();++opN)
@@ -238,6 +239,8 @@ int main(int argc, char** argv)
             continue;
         if(line.size()==0)
             continue;
+
+        ++testCount;
         try
         {
             capstone::cs_mode mode;
@@ -281,6 +284,8 @@ int main(int argc, char** argv)
             }
 
             auto operands=readOperands(in);
+            if(operands.size()==1 && operands[0].second==0)
+                continue;
             std::size_t operandCount=insn->detail->x86.op_count;
             if(operands.size()!=insn->detail->x86.op_count)
             {
@@ -304,8 +309,6 @@ int main(int argc, char** argv)
                     ++errorCount;
                 }
             }
-
-            ++testCount;
 
             capstone::cs_free(insn, 1);
             capstone::cs_close(&csh);
