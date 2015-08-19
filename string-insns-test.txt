@@ -121,6 +121,68 @@ Intel16: 0xffe1:       67 f2 ae     repne scasb al, byte ptr es:[edi]        ; r
 Intel16: 0xffe1:       66 f2 af     repne scasd eax, dword ptr es:[di]       ; reg32,mem32
 Intel16: 0xffe1:       67 f2 af     repne scasw ax, word ptr es:[edi]        ; reg16,mem16
 Intel16: 0xffe1:       67 66 f2 af  repne scasd eax, dword ptr es:[edi]      ; reg32,mem32
+# Now without any prefix
+# INS
+Intel16: 0xffe1:       6c        insb byte ptr es:[di], dx       ; mem8, reg16
+Intel16: 0xffe1:       6d        insw word ptr es:[di], dx       ; mem16, reg16
+Intel16: 0xffe1:       67 6c     insb byte ptr es:[edi], dx      ; mem8, reg16
+Intel16: 0xffe1:       66 6d     insd dword ptr es:[di], dx      ; mem32, reg16
+Intel16: 0xffe1:       67 6d     insw word ptr es:[edi], dx      ; mem16, reg16
+Intel16: 0xffe1:       67 66 6d  insd dword ptr es:[edi], dx     ; mem32, reg16
+# OUTS
+Intel16: 0xffe1:       6e        outsb dx, byte ptr es:[di]      ; reg16, mem8
+Intel16: 0xffe1:       6f        outsw dx, word ptr es:[di]      ; reg16, mem16
+Intel16: 0xffe1:       67 6e     outsb dx, byte ptr es:[edi]     ; reg16, mem8
+Intel16: 0xffe1:       66 6f     outsd dx, dword ptr es:[di]     ; reg16, mem32
+Intel16: 0xffe1:       67 6f     outsw dx, word ptr es:[edi]     ; reg16, mem16
+Intel16: 0xffe1:       67 66 6f  outsd dx, dword ptr es:[edi]    ; reg16, mem32
+# LODS
+Intel16: 0xffe1:       ac        lodsb al, byte ptr [si]         ; reg8, mem8
+Intel16: 0xffe1:       ad        lodsw ax, word ptr [si]         ; reg16, mem16
+Intel16: 0xffe1:       67 ac     lodsb al, byte ptr [esi]        ; reg8, mem8
+Intel16: 0xffe1:       66 ad     lodsd eax, dword ptr [si]       ; reg32, mem32
+Intel16: 0xffe1:       67 ad     lodsw ax, word ptr [esi]        ; reg16, mem16
+Intel16: 0xffe1:       67 66 ad  lodsd eax, dword ptr [esi]      ; reg32, mem32
+Intel16: 0xffe1:       36 ac        lodsb al, byte ptr ss:[si]   ; reg8, mem8
+Intel16: 0xffe1:       36 ad        lodsw ax, word ptr ss:[si]   ; reg16, mem16
+Intel16: 0xffe1:       36 67 ac     lodsb al, byte ptr ss:[esi]  ; reg8, mem8
+Intel16: 0xffe1:       36 66 ad     lodsd eax, dword ptr ss:[si] ; reg32, mem32
+Intel16: 0xffe1:       36 67 ad     lodsw ax, word ptr ss:[esi]  ; reg16, mem16
+Intel16: 0xffe1:       36 67 66 ad  lodsd eax, dword ptr ss:[esi]; reg32, mem32
+# STOS
+Intel16: 0xffe1:       aa        stosb byte ptr es:[di], al      ; mem8, reg8
+Intel16: 0xffe1:       ab        stosw word ptr es:[di], ax      ; mem16, reg16
+Intel16: 0xffe1:       67 aa     stosb byte ptr es:[edi], al     ; mem8, reg8
+Intel16: 0xffe1:       66 ab     stosd dword ptr es:[di], eax    ; mem32, reg32
+Intel16: 0xffe1:       67 ab     stosw word ptr es:[edi], ax     ; mem16, reg16
+Intel16: 0xffe1:       67 66 ab  stosd dword ptr es:[edi], eax   ; mem32, reg32
+# MOVS
+Intel16: 0xffe1:       a4        movsb byte ptr es:[di], byte ptr [si]           ; mem8,mem8
+Intel16: 0xffe1:       a5        movsw word ptr es:[di], word ptr [si]           ; mem16,mem16
+Intel16: 0xffe1:       67 a4     movsb byte ptr es:[edi], byte ptr [esi]         ; mem8,mem8
+Intel16: 0xffe1:       66 a5     movsd dword ptr es:[di], dword ptr [si]         ; mem32,mem32
+Intel16: 0xffe1:       67 a5     movsw word ptr es:[edi], word ptr [esi]         ; mem16,mem16
+Intel16: 0xffe1:       67 66 a5  movsd dword ptr es:[edi], dword ptr [esi]       ; mem32,mem32
+Intel16: 0xffe1:       64 a4        movsb byte ptr es:[di], byte ptr fs:[si]     ; mem8,mem8
+Intel16: 0xffe1:       64 a5        movsw word ptr es:[di], word ptr fs:[si]     ; mem16,mem16
+Intel16: 0xffe1:       64 67 a4     movsb byte ptr es:[edi], byte ptr fs:[esi]   ; mem8,mem8
+Intel16: 0xffe1:       64 66 a5     movsd dword ptr es:[di], dword ptr fs:[si]   ; mem32,mem32
+Intel16: 0xffe1:       64 67 a5     movsw word ptr es:[edi], word ptr fs:[esi]   ; mem16,mem16
+Intel16: 0xffe1:       64 67 66 a5  movsd dword ptr es:[edi], dword ptr fs:[esi] ; mem32,mem32
+# CMPS
+Intel16: 0xffe1:       a6        cmpsb byte ptr [si], byte ptr es:[di]          ; mem8,mem8
+Intel16: 0xffe1:       a7        cmpsw word ptr [si], word ptr es:[di]          ; mem16,mem16
+Intel16: 0xffe1:       67 a6     cmpsb byte ptr [esi], byte ptr es:[edi]        ; mem8,mem8
+Intel16: 0xffe1:       66 a7     cmpsd dword ptr [si], dword ptr es:[di]        ; mem32,mem32
+Intel16: 0xffe1:       67 a7     cmpsw word ptr [esi], word ptr es:[edi]        ; mem16,mem16
+Intel16: 0xffe1:       67 66 a7  cmpsd dword ptr [esi], dword ptr es:[edi]      ; mem32,mem32
+# SCAS
+Intel16: 0xffe1:       ae        scasb al, byte ptr es:[di]         ; reg8,mem8
+Intel16: 0xffe1:       af        scasw ax, word ptr es:[di]         ; reg16,mem16
+Intel16: 0xffe1:       67 ae     scasb al, byte ptr es:[edi]        ; reg8,mem8
+Intel16: 0xffe1:       66 af     scasd eax, dword ptr es:[di]       ; reg32,mem32
+Intel16: 0xffe1:       67 af     scasw ax, word ptr es:[edi]        ; reg16,mem16
+Intel16: 0xffe1:       67 66 af  scasd eax, dword ptr es:[edi]      ; reg32,mem32
 
 # Now 32 bit
 # INS
@@ -250,6 +312,71 @@ Intel32: 0x9123ffe1:       67 f2 ae     repne scasb al, byte ptr es:[di]      ; 
 Intel32: 0x9123ffe1:       66 f2 af     repne scasw ax, word ptr es:[edi]     ; reg16,mem16
 Intel32: 0x9123ffe1:       67 f2 af     repne scasd eax, dword ptr es:[di]    ; reg32,mem32
 Intel32: 0x9123ffe1:       67 66 f2 af  repne scasw ax, word ptr es:[di]      ; reg16,mem16
+# Now without any prefix
+# INS
+Intel32: 0x9123ffe1:       6c           insb byte ptr es:[edi], dx       ; mem8, reg16
+Intel32: 0x9123ffe1:       6d           insd dword ptr es:[edi], dx      ; mem32, reg16
+Intel32: 0x9123ffe1:       67 6c        insb byte ptr es:[di], dx        ; mem8, reg16
+Intel32: 0x9123ffe1:       66 6d        insw word ptr es:[edi], dx       ; mem16, reg16
+Intel32: 0x9123ffe1:       67 6d        insd dword ptr es:[di], dx       ; mem32, reg16
+Intel32: 0x9123ffe1:       67 66 6d     insd dword ptr es:[di], dx       ; mem32, reg16
+# OUTS
+Intel32: 0x9123ffe1:       6e           outsb dx, byte ptr es:[edi]      ; reg16, mem8
+Intel32: 0x9123ffe1:       6f           outsd dx, word ptr es:[edi]      ; reg16, mem32
+Intel32: 0x9123ffe1:       67 6e        outsb dx, byte ptr es:[di]       ; reg16, mem8
+Intel32: 0x9123ffe1:       66 6f        outsw dx, dword ptr es:[edi]     ; reg16, mem16
+Intel32: 0x9123ffe1:       67 6f        outsd dx, word ptr es:[di]       ; reg16, mem32
+Intel32: 0x9123ffe1:       67 66 6f     outsw dx, dword ptr es:[di]      ; reg16, mem16
+# LODS
+Intel32: 0x9123ffe1:       ac           lodsb al, byte ptr [esi]         ; reg8, mem8
+Intel32: 0x9123ffe1:       ad           lodsd eax, dword ptr [esi]       ; reg32, mem32
+Intel32: 0x9123ffe1:       67 ac        lodsb al, byte ptr [si]          ; reg8, mem8
+Intel32: 0x9123ffe1:       66 ad        lodsw ax, word ptr [esi]         ; reg16, mem16
+Intel32: 0x9123ffe1:       67 ad        lodsw eax, dword ptr [si]        ; reg32, mem32
+Intel32: 0x9123ffe1:       67 66 ad     lodsd ax, word ptr [si]          ; reg32, mem32
+
+Intel32: 0x9123ffe1:       36 ac        lodsb al, byte ptr ss:[esi]      ; reg8, mem8
+Intel32: 0x9123ffe1:       36 ad        lodsd ax, dword ptr ss:[esi]     ; reg32, mem32
+Intel32: 0x9123ffe1:       36 67 ac     lodsb al, byte ptr ss:[si]       ; reg8, mem8
+Intel32: 0x9123ffe1:       36 66 ad     lodsw ax, word ptr ss:[esi]      ; reg16, mem16
+Intel32: 0x9123ffe1:       36 67 ad     lodsd eax, dword ptr ss:[si]     ; reg32, mem32
+Intel32: 0x9123ffe1:       36 67 66 ad  lodsw ax, word ptr ss:[si]       ; reg16, mem16
+# STOS
+Intel32: 0x9123ffe1:       aa           stosb byte ptr es:[edi], al      ; mem8, reg8
+Intel32: 0x9123ffe1:       ab           stosd dword ptr es:[edi], eax    ; mem32, reg32
+Intel32: 0x9123ffe1:       67 aa        stosb byte ptr es:[di], al       ; mem8, reg8
+Intel32: 0x9123ffe1:       66 ab        stosw word ptr es:[edi], ax      ; mem16, reg16
+Intel32: 0x9123ffe1:       67 ab        stosd dword ptr es:[di], eax     ; mem32, reg32
+Intel32: 0x9123ffe1:       67 66 ab     stosw word ptr es:[di], ax       ; mem16, reg16
+# MOVS
+Intel32: 0x9123ffe1:       a4           movsb byte ptr es:[edi], byte ptr [esi]         ; mem8,mem8
+Intel32: 0x9123ffe1:       a5           movsd dword ptr es:[edi], dword ptr [esi]       ; mem32,mem32
+Intel32: 0x9123ffe1:       67 a4        movsb byte ptr es:[di], byte ptr [si]           ; mem8,mem8
+Intel32: 0x9123ffe1:       66 a5        movsw word ptr es:[edi], word ptr [esi]         ; mem16,mem16
+Intel32: 0x9123ffe1:       67 a5        movsd dword ptr es:[di], dword ptr [si]         ; mem32,mem32
+Intel32: 0x9123ffe1:       67 66 a5     movsw word ptr es:[di], word ptr [si]           ; mem16,mem16
+
+Intel32: 0x9123ffe1:       64 a4        movsb byte ptr es:[edi], byte ptr fs:[esi]      ; mem8,mem8
+Intel32: 0x9123ffe1:       64 a5        movsd dword ptr es:[edi], dword ptr fs:[esi]    ; mem32,mem32
+Intel32: 0x9123ffe1:       64 67 a4     movsb byte ptr es:[di], byte ptr fs:[si]        ; mem8,mem8
+Intel32: 0x9123ffe1:       64 66 a5     movsw word ptr es:[edi], word ptr fs:[esi]      ; mem16,mem16
+Intel32: 0x9123ffe1:       64 67 a5     movsd dword ptr es:[di], dword ptr fs:[si]      ; mem32,mem32
+Intel32: 0x9123ffe1:       64 67 66 a5  movsw word ptr es:[di], word ptr fs:[si]        ; mem16,mem16
+# CMPS
+Intel32: 0x9123ffe1:       a6        cmpsb byte ptr [esi], byte ptr es:[edi]           ; mem8,mem8
+Intel32: 0x9123ffe1:       a7        cmpsd dword ptr [esi], dword ptr es:[edi]         ; mem32,mem32
+Intel32: 0x9123ffe1:       67 a6     cmpsb byte ptr [si], byte ptr es:[di]             ; mem8,mem8
+Intel32: 0x9123ffe1:       66 a7     cmpsw word ptr [esi], word ptr es:[edi]           ; mem16,mem16
+Intel32: 0x9123ffe1:       67 a7     cmpsd dword ptr [si], dword ptr es:[di]           ; mem32,mem32
+Intel32: 0x9123ffe1:       67 66 a7  cmpsw word ptr [si], word ptr es:[di]             ; mem16,mem16
+# SCAS
+Intel32: 0x9123ffe1:       ae        scasb al, byte ptr es:[edi]     ; reg8,mem8
+Intel32: 0x9123ffe1:       af        scasd eax, dword ptr es:[edi]   ; reg32,mem32
+Intel32: 0x9123ffe1:       67 ae     scasb al, byte ptr es:[di]      ; reg8,mem8
+Intel32: 0x9123ffe1:       66 af     scasw ax, word ptr es:[edi]     ; reg16,mem16
+Intel32: 0x9123ffe1:       67 af     scasd eax, dword ptr es:[di]    ; reg32,mem32
+Intel32: 0x9123ffe1:       67 66 af  scasw ax, word ptr es:[di]      ; reg16,mem16
+
 
 
 # Now 64 bit
