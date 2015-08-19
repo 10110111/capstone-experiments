@@ -224,7 +224,7 @@ int main(int argc, char** argv)
     capstone::csh csh;
     if(argc<2)
     {
-        std::cerr << "Usage: " << argv[0] << " filename\n";
+        std::cerr << "Usage: " << argv[0] << " filename [--nostring] [--nosize] [--fail-fast]\n";
         return -1;
     }
     std::string filename(argv[1]);
@@ -234,13 +234,31 @@ int main(int argc, char** argv)
         std::cerr << "Failed to open \""<<argv[1]<<"\"\n";
         return -2;
     }
+    bool doStringCheck=true, doSizeCheck=true, failFast=false;
+    for(int argN=2;argN<argc;++argN)
+    {
+        std::string arg(argv[argN]);
+        if(arg=="--nostring")
+            doStringCheck=false;
+        if(arg=="--nosize")
+            doSizeCheck=false;
+        if(arg=="--fail-fast")
+            failFast=true;
+    }
 
     std::string line;
     std::size_t lineNum=0;
 
     std::vector<bool> testResults;
+    capstone::cs_insn *insn=nullptr;
     while(std::getline(file,line))
     {
+        if(insn)
+        {
+            capstone::cs_free(insn, 1);
+            capstone::cs_close(&csh);
+            insn=nullptr;
+        }
         location=std::string(filename)+":"+std::to_string(++lineNum)+": ";
         if(line[0]=='#')
             continue;
@@ -264,7 +282,6 @@ int main(int argc, char** argv)
             uint64_t address=readAddress(in);
             std::vector<uint8_t> bytes=readBytes(in);
             std::string expectedInsnString=readInstructionString(in);
-            capstone::cs_insn *insn;
             try { insn=disassemble(csh,bytes,address); }
             catch(const std::string& error)
             {
@@ -281,13 +298,14 @@ int main(int argc, char** argv)
             }
 
             std::string actualInsnString=std::string(insn->mnemonic)+" "+insn->op_str;
-            if(expectedInsnString!=actualInsnString)
+            if(doStringCheck && expectedInsnString!=actualInsnString)
             {
                 std::cerr << location << "error: expected and actual instruction strings differ\n";
                 std::cerr << line << "\n";
                 std::cerr << location << "note: expected string is: " << expectedInsnString << "\n";
                 std::cerr << location << "note: capstone returned : " << actualInsnString << "\n";
                 testResults.back()=false;
+                if(failFast) continue;
             }
 
             auto operands=readOperands(in);
@@ -300,6 +318,7 @@ int main(int argc, char** argv)
                 std::cerr << line << "\n";
                 std::cerr << formatPosition(in);
                 testResults.back()=false;
+                if(failFast) continue;
             }
             for(std::size_t i=0;i<operands.size();++i)
             {
@@ -308,17 +327,16 @@ int main(int argc, char** argv)
                     std::cerr << location << "error: operand #" << i+1 << ": expected type " << formatOperandTypeSize(operands[i]) << ", capstone returned " << formatOperandTypeSize(std::make_pair(insn->detail->x86.operands[i].type,insn->detail->x86.operands[i].size))<< "\n";
                     std::cerr << line << "\n";
                     testResults.back()=false;
+                    if(failFast) continue;
                 }
-                if(operands[i].second!=insn->detail->x86.operands[i].size)
+                if(doSizeCheck && operands[i].second!=insn->detail->x86.operands[i].size)
                 {
                     std::cerr << location << "error: operand #" << i+1 << ": expected size " << 8*operands[i].second << " bit, capstone returned " << 8*insn->detail->x86.operands[i].size << " bit\n";
                     std::cerr << line << "\n";
                     testResults.back()=false;
+                    if(failFast) continue;
                 }
             }
-
-            capstone::cs_free(insn, 1);
-            capstone::cs_close(&csh);
         }
         catch(const std::string& error)
         {
