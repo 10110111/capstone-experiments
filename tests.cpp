@@ -303,7 +303,7 @@ int main(int argc, char** argv)
                 std::cerr << formatPosition(in);
                 ++errorCount;
             }
-            for(std::size_t i=0;i<operandCount;++i)
+            for(std::size_t i=0;i<operands.size();++i)
             {
                 if(operands[i].first!=insn->detail->x86.operands[i].type)
                 {
