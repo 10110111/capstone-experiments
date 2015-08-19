@@ -219,12 +219,17 @@ std::string formatOperandTypeSize(const std::pair<capstone::x86_op_type,std::siz
     return str+std::to_string(8*size);
 }
 
+void usage(char** argv)
+{
+    std::cerr << "Usage: " << argv[0] << " filename [--nostring] [--nosize] [--fail-fast]\n";
+}
+
 int main(int argc, char** argv)
 {
     capstone::csh csh;
     if(argc<2)
     {
-        std::cerr << "Usage: " << argv[0] << " filename [--nostring] [--nosize] [--fail-fast]\n";
+        usage(argv);
         return -1;
     }
     std::string filename(argv[1]);
@@ -240,10 +245,16 @@ int main(int argc, char** argv)
         std::string arg(argv[argN]);
         if(arg=="--nostring")
             doStringCheck=false;
-        if(arg=="--nosize")
+        else if(arg=="--nosize")
             doSizeCheck=false;
-        if(arg=="--fail-fast")
+        else if(arg=="--fail-fast")
             failFast=true;
+        else
+        {
+            std::cerr << "Unknown option: " << arg << "\n";
+            usage(argv);
+            return -1;
+        }
     }
 
     std::string line;
