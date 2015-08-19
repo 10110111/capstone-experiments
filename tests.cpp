@@ -14,6 +14,14 @@ namespace capstone
 
 std::string location;
 
+void trimws(std::string& str)
+{
+    while(str.size() && str[0]==' ')
+        str.erase(str.begin());
+    while(str.size() && str.back()==' ')
+        str.pop_back();
+}
+
 char skipws(std::istringstream& in)
 {
     char c;
@@ -164,6 +172,7 @@ std::vector<std::pair<capstone::x86_op_type,std::size_t>> readOperands(std::istr
     {
         std::string operandStr;
         std::getline(in,operandStr,',');
+        trimws(operandStr);
         std::string typeStr(operandStr,0,3);
         capstone::x86_op_type type=capstone::X86_OP_INVALID;
              if(typeStr=="mem") type=capstone::X86_OP_MEM;
