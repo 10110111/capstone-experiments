@@ -238,9 +238,7 @@ int main(int argc, char** argv)
     std::string line;
     std::size_t lineNum=0;
 
-    std::size_t errorCount=0;
-    std::size_t testCount=0;
-   
+    std::vector<bool> testResults;
     while(std::getline(file,line))
     {
         location=std::string(filename)+":"+std::to_string(++lineNum)+": ";
@@ -249,7 +247,7 @@ int main(int argc, char** argv)
         if(line.size()==0)
             continue;
 
-        ++testCount;
+        testResults.push_back(true);
         try
         {
             capstone::cs_mode mode;
@@ -271,14 +269,14 @@ int main(int argc, char** argv)
             catch(const std::string& error)
             {
                 std::cerr << error;
-                ++errorCount;
+                testResults.back()=false;
                 continue;
             }
             if(insn->size < bytes.size())
             {
                 std::cerr << location << "error: extra " << bytes.size()-insn->size << " bytes after instruction\n";
                 std::cerr << line << "\n";
-                ++errorCount;
+                testResults.back()=false;
                 continue;
             }
 
@@ -289,7 +287,7 @@ int main(int argc, char** argv)
                 std::cerr << line << "\n";
                 std::cerr << location << "note: expected string is: " << expectedInsnString << "\n";
                 std::cerr << location << "note: capstone returned : " << actualInsnString << "\n";
-                ++errorCount;
+                testResults.back()=false;
             }
 
             auto operands=readOperands(in);
@@ -301,7 +299,7 @@ int main(int argc, char** argv)
                 std::cerr << location << "error: expected " << operands.size() << " operands, capstone returned " << operandCount << "\n";
                 std::cerr << line << "\n";
                 std::cerr << formatPosition(in);
-                ++errorCount;
+                testResults.back()=false;
             }
             for(std::size_t i=0;i<operands.size();++i)
             {
@@ -309,13 +307,13 @@ int main(int argc, char** argv)
                 {
                     std::cerr << location << "error: operand #" << i+1 << ": expected type " << formatOperandTypeSize(operands[i]) << ", capstone returned " << formatOperandTypeSize(std::make_pair(insn->detail->x86.operands[i].type,insn->detail->x86.operands[i].size))<< "\n";
                     std::cerr << line << "\n";
-                    ++errorCount;
+                    testResults.back()=false;
                 }
                 if(operands[i].second!=insn->detail->x86.operands[i].size)
                 {
                     std::cerr << location << "error: operand #" << i+1 << ": expected size " << 8*operands[i].second << " bit, capstone returned " << 8*insn->detail->x86.operands[i].size << " bit\n";
                     std::cerr << line << "\n";
-                    ++errorCount;
+                    testResults.back()=false;
                 }
             }
 
@@ -329,8 +327,9 @@ int main(int argc, char** argv)
         }
     }
 
+    std::size_t errorCount=std::count(testResults.begin(),testResults.end(),false);
     if(errorCount)
-        std::cerr << "\n" << errorCount << " tests FAILED" << " out of " << testCount << "\n";
+        std::cerr << "\n" << errorCount << " tests FAILED" << " out of " << testResults.size() << "\n";
     else
         std::cerr << "All tests PASSED\n";
 
