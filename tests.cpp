@@ -298,7 +298,7 @@ int main(int argc, char** argv)
             const std::size_t operandCount=insn->detail->x86.op_count;
             if(operands.size()!=operandCount)
             {
-                std::cerr << location << "expected " << operands.size() << " operands, capstone returned " << operandCount << "\n";
+                std::cerr << location << "error: expected " << operands.size() << " operands, capstone returned " << operandCount << "\n";
                 std::cerr << line << "\n";
                 std::cerr << formatPosition(in);
                 ++errorCount;
