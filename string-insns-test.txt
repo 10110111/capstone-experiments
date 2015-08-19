@@ -53,12 +53,12 @@ Intel16: 0xffe1:       66 f3 a7     repe cmpsd dword ptr [si], dword ptr es:[di]
 Intel16: 0xffe1:       67 f3 a7     repe cmpsw word ptr [esi], word ptr es:[edi]        ; mem16,mem16
 Intel16: 0xffe1:       67 66 f3 a7  repe cmpsd dword ptr [esi], dword ptr es:[edi]      ; mem32,mem32
 # SCAS
-Intel16: 0xffe1:       f3 ae        repe scasb byte ptr es:[di]         ; mem8
-Intel16: 0xffe1:       f3 af        repe scasw word ptr es:[di]         ; mem16
-Intel16: 0xffe1:       67 f3 ae     repe scasb byte ptr es:[edi]        ; mem8
-Intel16: 0xffe1:       66 f3 af     repe scasd dword ptr es:[di]        ; mem32
-Intel16: 0xffe1:       67 f3 af     repe scasw word ptr es:[edi]        ; mem16
-Intel16: 0xffe1:       67 66 f3 af  repe scasd dword ptr es:[edi]       ;mem32
+Intel16: 0xffe1:       f3 ae        repe scasb al, byte ptr es:[di]         ; reg8,mem8
+Intel16: 0xffe1:       f3 af        repe scasw ax, word ptr es:[di]         ; reg16,mem16
+Intel16: 0xffe1:       67 f3 ae     repe scasb al, byte ptr es:[edi]        ; reg8,mem8
+Intel16: 0xffe1:       66 f3 af     repe scasd eax, dword ptr es:[di]       ; reg32,mem32
+Intel16: 0xffe1:       67 f3 af     repe scasw ax, word ptr es:[edi]        ; reg16,mem16
+Intel16: 0xffe1:       67 66 f3 af  repe scasd eax, dword ptr es:[edi]      ; reg32,mem32
 # TODO: also check F2 repne prefix
 
 Intel32: 0x9123ffe1:   f3 6c        rep insb byte ptr es:[edi], dx
