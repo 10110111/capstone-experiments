@@ -307,7 +307,7 @@ int main(int argc, char** argv)
             {
                 if(operands[i].first!=insn->detail->x86.operands[i].type)
                 {
-                    std::cerr << location << "error: operand #" << i+1 << ": expected type " << formatOperandTypeSize(operands[i]) << " capstone returned " << formatOperandTypeSize(std::make_pair(insn->detail->x86.operands[i].type,insn->detail->x86.operands[i].size))<< "\n";
+                    std::cerr << location << "error: operand #" << i+1 << ": expected type " << formatOperandTypeSize(operands[i]) << ", capstone returned " << formatOperandTypeSize(std::make_pair(insn->detail->x86.operands[i].type,insn->detail->x86.operands[i].size))<< "\n";
                     std::cerr << line << "\n";
                     ++errorCount;
                 }
