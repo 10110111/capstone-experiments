@@ -295,8 +295,8 @@ int main(int argc, char** argv)
             auto operands=readOperands(in);
             if(operands.size()==1 && operands[0].second==0)
                 continue;
-            std::size_t operandCount=insn->detail->x86.op_count;
-            if(operands.size()!=insn->detail->x86.op_count)
+            const std::size_t operandCount=insn->detail->x86.op_count;
+            if(operands.size()!=operandCount)
             {
                 std::cerr << location << "expected " << operands.size() << " operands, capstone returned " << operandCount << "\n";
                 std::cerr << line << "\n";
