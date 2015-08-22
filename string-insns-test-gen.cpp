@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <cstdint>
 #include <algorithm>
 #include <array>
@@ -63,11 +64,14 @@ std::ostream& operator<<(std::ostream& str, std::vector<uint8_t> vec)
     return str;
 }
 
-std::string toHexString(std::size_t val)
+std::string toHexString(uint64_t val, bool fill=false, char sym='\0')
 {
     std::ostringstream str;
-    str << std::hex << val;
-    return str.str();
+    str << std::hex << val << sym;
+    std::ostringstream adjusted;
+    if(fill) adjusted << std::setw(12) << std::left;
+    adjusted << str.str();
+    return adjusted.str();
 }
 
 std::size_t addressSize(const std::vector<uint8_t>& prefixes, Mode mode)
@@ -195,54 +199,61 @@ constexpr std::size_t insnCount=sizeof(insns)/sizeof(insns[0]);
 
 int main()
 {
-    std::vector<uint8_t> prefixes{0x67,0xf3};
-    Mode mode=Use16;
-    std::size_t address=0xffe1;
-    for(const auto& insn: insns)
+    const std::vector<uint8_t> prefixSets[]{{0x67,0xf3},{0x66,0xf2},{0x66,0x67,0xf3},{0xf3}};
+    Mode modes[]={Use16,Use32,Use64};
+    for(Mode mode: modes)
     {
-        std::size_t addrSize=addressSize(prefixes,mode);
-        std::size_t opSize  =operandSize(prefixes,mode);
-        std::ostringstream line;
-        line << "Intel";
-        line << mode;
-        line << ": 0x";
-        line << toHexString(address);
-        line << ": ";
-        line << prefixes;
-        line << toHexString({insn.opcode});
-        line << "  " << prefixNames(prefixes) << " " << insn.mnemonic;
-
-        for(const auto& operand: insn.operands)
+        uint64_t address=0x649123ffe1ull;
+        if(mode==Use16) address&=0xffffull;
+        if(mode==Use32) address&=0xffffffffull;
+        for(std::size_t pfxSN=0;pfxSN<sizeof(prefixSets)/sizeof(prefixSets[0]);++pfxSN)
         {
-            std::string opName=regName(opSize, operand.string);
-            switch(operand.type)
+            const std::vector<uint8_t>& prefixes=prefixSets[pfxSN];
+            for(const auto& insn: insns)
             {
-            case REG8:
-                opSize=8;
-                break;
-            case REG16:
-                opSize=16;
-                break;
-            case REGW:
-                // all done
-                break;
-            case MEM8:
-                opSize=8;
-                // fall through
-            case MEMW:
-            {
-                std::string seg=segOverrideStr(segmentOverride(prefixes),operand.seg);
-                opName=sizeName(opSize)+" ptr "+seg+"["+regName(addrSize,operand.string)+"]";
-                opName=std::string{opName[0]}+" "+opName;
-                break;
+                std::size_t addrSize=addressSize(prefixes,mode);
+                std::size_t opSize  =operandSize(prefixes,mode);
+                std::ostringstream line;
+                line << "Intel";
+                line << mode;
+                line << ": 0x";
+                line << toHexString(address,true,':');
+                line << " " << prefixes;
+                line << toHexString({insn.opcode});
+                line << "  " << prefixNames(prefixes) << " " << insn.mnemonic;
+
+                for(const auto& operand: insn.operands)
+                {
+                    std::string opName=regName(opSize, operand.string);
+                    switch(operand.type)
+                    {
+                    case REG8:
+                        opSize=8;
+                        break;
+                    case REG16:
+                        opSize=16;
+                        break;
+                    case REGW:
+                        // all done
+                        break;
+                    case MEM8:
+                        opSize=8;
+                        // fall through
+                    case MEMW:
+                    {
+                        std::string seg=segOverrideStr(segmentOverride(prefixes),operand.seg);
+                        opName=sizeName(opSize)+" ptr "+seg+"["+regName(addrSize,operand.string)+"]";
+                        opName=std::string{opName[0]}+" "+opName;
+                        break;
+                    }
+                    }
+                    line << opName << ", ";
+                }
+                line.seekp(-2,std::ios_base::cur);
+                line << ";";
+
+                std::cout << line.str() << "\n";
             }
-            }
-            line << opName << ", ";
         }
-        line.seekp(-2,std::ios_base::cur);
-        line << ";";
-
-        std::cout << line.str() << "\n";
     }
-
 }
