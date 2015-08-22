@@ -105,9 +105,8 @@ std::size_t operandSize(const std::vector<uint8_t>& prefixes, Mode mode)
     case Use16:
         return overridden? 32 : 16;
     case Use32:
-        return overridden? 16 : 32;
     case Use64:
-        return overridden? 32 : 64;
+        return overridden? 16 : 32;
     }
     return 0;
 }
