@@ -147,7 +147,7 @@ std::string regName(std::size_t opSize, const std::string& str)
     }
 }
 
-std::string prefixNames(std::vector<uint8_t> prefixes)
+std::string prefixNames(const std::vector<uint8_t>& prefixes)
 {
     std::stringstream str;
     for(const uint8_t pfx: prefixes)
@@ -160,6 +160,32 @@ std::string prefixNames(std::vector<uint8_t> prefixes)
         }
     }
     return str.str();
+}
+
+Segment segmentOverride(const std::vector<uint8_t>& prefixes)
+{
+    for(const uint8_t pfx: prefixes)
+    {
+        switch(pfx)
+        {
+        case 0x26: return ES;
+        case 0x2e: return CS;
+        case 0x36: return SS;
+        case 0x3e: return DS;
+        case 0x64: return FS;
+        case 0x65: return GS;
+        }
+    }
+    return SEG_NONE;
+}
+
+std::string segOverrideStr(Segment override_, Segment default_)
+{
+    if(default_==DS && override_!=DS)
+        return segName(override_)+':';
+    if(default_==DS)
+        return "";
+    return segName(default_)+':';
 }
 
 std::array<Instruction,1> insns={
@@ -184,7 +210,7 @@ int main()
         line << ": ";
         line << prefixes;
         line << toHexString({insn.opcode});
-        line << " " << prefixNames(prefixes) << " " << insn.mnemonic;
+        line << "  " << prefixNames(prefixes) << " " << insn.mnemonic;
 
         for(const auto& operand: insn.operands)
         {
@@ -205,8 +231,7 @@ int main()
                 // fall through
             case MEMW:
             {
-                std::string seg=segName(operand.seg);
-                seg=seg.size()? seg+":" : "";
+                std::string seg=segOverrideStr(segmentOverride(prefixes),operand.seg);
                 opName=sizeName(opSize)+" ptr "+seg+"["+regName(addrSize,operand.string)+"]";
                 opName=std::string{opName[0]}+" "+opName;
                 break;
