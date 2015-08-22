@@ -59,8 +59,12 @@ std::ostream& operator<<(std::ostream& str, Mode mode)
 
 std::ostream& operator<<(std::ostream& str, std::vector<uint8_t> vec)
 {
+    std::ostringstream stream;
     for(const uint8_t val: vec)
-        str << std::hex << (val&0xff) << " ";
+        stream << std::hex << (val&0xff) << " ";
+    std::ostringstream adjusted;
+    adjusted << std::setw(20) << std::left << stream.str();
+    str << adjusted.str();
     return str;
 }
 
@@ -215,13 +219,13 @@ int main()
             {
                 std::size_t addrSize=addressSize(prefixes,mode);
                 std::size_t opSize  =operandSize(prefixes,mode);
+                std::vector<uint8_t> hex=prefixes; hex.push_back(insn.opcode);
                 std::ostringstream line;
                 line << "Intel";
                 line << mode;
                 line << ": 0x";
                 line << toHexString(address,true,':');
-                line << " " << prefixes;
-                line << toHexString({insn.opcode});
+                line << " " << hex;
                 line << "  " << prefixNames(prefixes) << " " << insn.mnemonic;
 
                 std::size_t opNum=1;
