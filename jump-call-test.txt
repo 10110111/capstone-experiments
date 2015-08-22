@@ -8,8 +8,10 @@ AT&T64 : 0x649123ffe1: B8 12 34 64 f3                   movl $0xf3643412, %eax  
 Intel64: 0x649123ffe1: 48 A1 12 34 64 f3 23 f8 e5 cf    movabs rax, qword ptr [0xcfe5f823f3643412] ;reg64,mem64
 
 Intel16: 0xffe1: e8 35 64               call 0x6419        ; imm16
+Intel16: 0xffb0: eb 7f                  jmp 0x31           ; imm16
 Intel16: 0xffe1: 66 e8 35 64 93 53      call 0x5394641c    ; imm32
 Intel32: 0x9123ffe1: e8 35 64 93 53     call 0xe4b7641b    ; imm32
+#Intel32: 0x9123ffb0: 66 eb 7f           jmp 0x32           ; imm16
 Intel32: 0x9123ffe1: 66 e8 35 64        call 0x641a        ; imm16
 Intel64: 0x649123ffe1: e8 35 64 93 53   call 0x64e4b7641b  ; imm64
 Intel64: 0x649123ffe1: 66 e8 35 64      call 0x641a        ; imm16
