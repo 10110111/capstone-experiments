@@ -200,8 +200,18 @@ std::string segOverrideStr(Segment override_, Segment default_)
 Instruction insns[]={
 {0x6c, "ins", false, MEM8, "di", ES, REG16, "d", SEG_NONE},
 {0x6d, "ins", false, MEMW, "di", ES, REG16, "d", SEG_NONE},
+{0x6e, "outs", false, REG16, "d", SEG_NONE, MEM8, "di", ES},
+{0x6f, "outs", false, REG16, "d", SEG_NONE, MEMW, "di", ES},
+{0xa4, "movs", false, MEM8, "di", ES, MEM8, "si", DS},
 {0xa5, "movs", false, MEMW, "di", ES, MEMW, "si", DS},
-{0xa7, "cmps", true, MEMW, "si", DS, MEMW, "di", ES}
+{0xa6, "cmps", true, MEM8, "si", DS, MEM8, "di", ES},
+{0xa7, "cmps", true, MEMW, "si", DS, MEMW, "di", ES},
+{0xaa, "stos", false, MEM8, "di", ES, REG8, "a", SEG_NONE},
+{0xab, "stos", false, MEMW, "di", ES, REGW, "a", SEG_NONE},
+{0xac, "lods", false, REG8, "a", SEG_NONE, MEM8, "si", DS},
+{0xad, "lods", false, REGW, "a", SEG_NONE, MEMW, "si", DS},
+{0xae, "scas", true, REG8, "a", SEG_NONE, MEM8, "di", ES},
+{0xaf, "scas", true, REGW, "a", SEG_NONE, MEMW, "di", ES}
 };
 constexpr std::size_t insnCount=sizeof(insns)/sizeof(insns[0]);
 
