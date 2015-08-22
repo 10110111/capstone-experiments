@@ -185,15 +185,17 @@ Segment segmentOverride(const std::vector<uint8_t>& prefixes)
 
 std::string segOverrideStr(Segment override_, Segment default_)
 {
-    if(default_==DS && override_!=DS)
+    if(default_==DS && override_!=DS && override_!=SEG_NONE)
         return segName(override_)+':';
-    if(default_==DS)
+    if(default_==DS || default_==SEG_NONE)
         return "";
     return segName(default_)+':';
 }
 
-std::array<Instruction,1> insns={
-{0x6c, "ins", MEM8, "di", ES, REG16, "d", SEG_NONE}
+Instruction insns[]={
+{0x6c, "ins", MEM8, "di", ES, REG16, "d", SEG_NONE},
+{0x6d, "ins", MEMW, "di", ES, REG16, "d", SEG_NONE},
+{0xa4, "movs", MEMW, "di", ES, MEMW, "si", DS}
 };
 constexpr std::size_t insnCount=sizeof(insns)/sizeof(insns[0]);
 
@@ -222,6 +224,7 @@ int main()
                 line << toHexString({insn.opcode});
                 line << "  " << prefixNames(prefixes) << " " << insn.mnemonic;
 
+                std::size_t opNum=1;
                 for(const auto& operand: insn.operands)
                 {
                     std::string opName=regName(opSize, operand.string);
@@ -229,9 +232,11 @@ int main()
                     {
                     case REG8:
                         opSize=8;
+                        opName=regName(opSize, operand.string);
                         break;
                     case REG16:
                         opSize=16;
+                        opName=regName(opSize, operand.string);
                         break;
                     case REGW:
                         // all done
@@ -243,11 +248,12 @@ int main()
                     {
                         std::string seg=segOverrideStr(segmentOverride(prefixes),operand.seg);
                         opName=sizeName(opSize)+" ptr "+seg+"["+regName(addrSize,operand.string)+"]";
-                        opName=std::string{opName[0]}+" "+opName;
+                        if(opNum==1) opName=std::string{opName[0]}+" "+opName;
                         break;
                     }
                     }
                     line << opName << ", ";
+                    ++opNum;
                 }
                 line.seekp(-2,std::ios_base::cur);
                 line << ";";
