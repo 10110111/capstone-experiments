@@ -218,7 +218,19 @@ constexpr std::size_t insnCount=sizeof(insns)/sizeof(insns[0]);
 
 int main()
 {
-    const std::vector<uint8_t> prefixSets[]{{0x67,0xf3},{0x66,0xf2},{0x66,0x67,0xf3},{0xf3},{},{0x66},{0x67},{0x66,0x67}};
+    const std::vector<uint8_t> prefixSets[]{{0xf3,0x48},
+                                            {0x48},
+                                            {0x66,0x48},
+                                            {0x66,0x67,0x48},
+                                            {0x66,0x67,0xf2,0x48},
+                                            {0x67,0xf3},
+                                            {0x66,0xf2},
+                                            {0x66,0x67,0xf3},
+                                            {0xf3},
+                                            {},
+                                            {0x66},
+                                            {0x67},
+                                            {0x66,0x67}};
     Mode modes[]={Use16,Use32,Use64};
     for(Mode mode: modes)
     {
@@ -228,6 +240,8 @@ int main()
         for(std::size_t pfxSN=0;pfxSN<sizeof(prefixSets)/sizeof(prefixSets[0]);++pfxSN)
         {
             const std::vector<uint8_t>& prefixes=prefixSets[pfxSN];
+            if(prefixes.size() && prefixes.back()==0x48 && mode!=Use64)
+                continue;
             for(const auto& insn: insns)
             {
                 const std::size_t addrSize=addressSize(prefixes,mode);
