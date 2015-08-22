@@ -230,8 +230,7 @@ int main()
             const std::vector<uint8_t>& prefixes=prefixSets[pfxSN];
             for(const auto& insn: insns)
             {
-                std::size_t addrSize=addressSize(prefixes,mode);
-                std::size_t opSize  =operandSize(prefixes,mode);
+                const std::size_t addrSize=addressSize(prefixes,mode);
                 std::vector<uint8_t> hex=prefixes; hex.push_back(insn.opcode);
                 std::ostringstream line;
                 line << "Intel";
@@ -247,6 +246,7 @@ int main()
                 char mnemonicSuffix=0;
                 for(const auto& operand: insn.operands)
                 {
+                    std::size_t opSize=operandSize(prefixes,mode);
                     std::string opName=regName(opSize, operand.string);
                     switch(operand.type)
                     {
