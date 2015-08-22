@@ -231,6 +231,7 @@ int main()
                 line << "  " << prefixNames(prefixes,insn.repe) << " " << insn.mnemonic;
 
                 std::size_t opNum=1;
+                std::stringstream typeSizes;
                 for(const auto& operand: insn.operands)
                 {
                     std::string opName=regName(opSize, operand.string);
@@ -239,12 +240,15 @@ int main()
                     case REG8:
                         opSize=8;
                         opName=regName(opSize, operand.string);
+                        typeSizes<<"reg";
                         break;
                     case REG16:
                         opSize=16;
+                        typeSizes<<"reg";
                         opName=regName(opSize, operand.string);
                         break;
                     case REGW:
+                        typeSizes<<"reg";
                         // all done
                         break;
                     case MEM8:
@@ -255,16 +259,20 @@ int main()
                         std::string seg=segOverrideStr(segmentOverride(prefixes),operand.seg);
                         opName=sizeName(opSize)+" ptr "+seg+"["+regName(addrSize,operand.string)+"]";
                         if(opNum==1) opName=std::string{opName[0]}+" "+opName;
+                        typeSizes<<"mem";
                         break;
                     }
                     }
                     line << opName << ", ";
+                    typeSizes << opSize << ", ";
                     ++opNum;
                 }
                 line.seekp(-2,std::ios_base::cur);
                 line << ";";
+                typeSizes.seekp(-2,std::ios_base::cur);
+                typeSizes << ";";
 
-                std::cout << line.str() << "\n";
+                std::cout << line.str() << typeSizes.str() << "\n";
             }
         }
     }
