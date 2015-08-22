@@ -200,8 +200,8 @@ std::string segOverrideStr(Segment override_, Segment default_)
 Instruction insns[]={
 {0x6c, "ins", false, MEM8, "di", ES, REG16, "d", SEG_NONE},
 {0x6d, "ins", false, MEMW, "di", ES, REG16, "d", SEG_NONE},
-{0xa4, "movs", false, MEMW, "di", ES, MEMW, "si", DS},
-{0xa7, "cmps", true, MEMW, "di", ES, MEMW, "si", DS}
+{0xa5, "movs", false, MEMW, "di", ES, MEMW, "si", DS},
+{0xa7, "cmps", true, MEMW, "si", DS, MEMW, "di", ES}
 };
 constexpr std::size_t insnCount=sizeof(insns)/sizeof(insns[0]);
 
