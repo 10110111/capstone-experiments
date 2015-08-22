@@ -237,10 +237,12 @@ int main()
                 line << ": 0x";
                 line << toHexString(address,true,':');
                 line << " " << hex;
-                line << "  " << prefixNames(prefixes,insn.repe) << " " << insn.mnemonic;
+                line << "  ";
 
                 std::size_t opNum=1;
-                std::stringstream typeSizes;
+                std::stringstream typeSizesStream;
+                std::ostringstream opStream;
+                char mnemonicSuffix=0;
                 for(const auto& operand: insn.operands)
                 {
                     std::string opName=regName(opSize, operand.string);
@@ -249,15 +251,15 @@ int main()
                     case REG8:
                         opSize=8;
                         opName=regName(opSize, operand.string);
-                        typeSizes<<"reg";
+                        typeSizesStream<<"reg";
                         break;
                     case REG16:
                         opSize=16;
-                        typeSizes<<"reg";
+                        typeSizesStream<<"reg";
                         opName=regName(opSize, operand.string);
                         break;
                     case REGW:
-                        typeSizes<<"reg";
+                        typeSizesStream<<"reg";
                         // all done
                         break;
                     case MEM8:
@@ -267,21 +269,29 @@ int main()
                     {
                         std::string seg=segOverrideStr(segmentOverride(prefixes),operand.seg);
                         opName=sizeName(opSize)+" ptr "+seg+"["+regName(addrSize,operand.string)+"]";
-                        if(opNum==1) opName=std::string{opName[0]}+" "+opName;
-                        typeSizes<<"mem";
+                        typeSizesStream<<"mem";
+                        mnemonicSuffix=opName[0];
                         break;
                     }
                     }
-                    line << opName << ", ";
-                    typeSizes << opSize << ", ";
+                    opStream<< opName << ", ";
+                    typeSizesStream << opSize << ", ";
                     ++opNum;
                 }
-                line.seekp(-2,std::ios_base::cur);
-                line << ";";
-                typeSizes.seekp(-2,std::ios_base::cur);
-                typeSizes << ";";
+                std::string opString=opStream.str();
+                opString.pop_back();
+                opString.pop_back();
+                std::ostringstream opStrAligned;
+                opStrAligned << std::left << std::setw(50) << opString << ";";
 
-                std::cout << line.str() << typeSizes.str() << "\n";
+                std::string typeSizes=typeSizesStream.str();
+                typeSizes.pop_back();
+                typeSizes.pop_back();
+
+                std::cout << line.str() << prefixNames(prefixes,insn.repe) << " "
+                          << insn.mnemonic << mnemonicSuffix << " "
+                          << opStrAligned.str()
+                          << typeSizes << "\n";
             }
         }
     }
