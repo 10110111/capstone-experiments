@@ -187,8 +187,10 @@ Segment segmentOverride(const std::vector<uint8_t>& prefixes)
     return SEG_NONE;
 }
 
-std::string segOverrideStr(Segment override_, Segment default_)
+std::string segOverrideStr(Segment override_, Segment default_, Mode mode)
 {
+    if(mode==Use64 && override_==SEG_NONE)
+        return "";
     if(default_==DS && override_!=DS && override_!=SEG_NONE)
         return segName(override_)+':';
     if(default_==DS || default_==SEG_NONE)
@@ -267,7 +269,7 @@ int main()
                         // fall through
                     case MEMW:
                     {
-                        std::string seg=segOverrideStr(segmentOverride(prefixes),operand.seg);
+                        std::string seg=segOverrideStr(segmentOverride(prefixes),operand.seg,mode);
                         opName=sizeName(opSize)+" ptr "+seg+"["+regName(addrSize,operand.string)+"]";
                         typeSizesStream<<"mem";
                         mnemonicSuffix=opName[0];
