@@ -36,6 +36,7 @@ struct Instruction
 {
     uint8_t opcode;
     const char* mnemonic;
+    bool repe;
     std::array<Operand,2> operands;
 };
 
@@ -155,14 +156,14 @@ std::string regName(std::size_t opSize, const std::string& str)
     }
 }
 
-std::string prefixNames(const std::vector<uint8_t>& prefixes)
+std::string prefixNames(const std::vector<uint8_t>& prefixes, bool repe)
 {
     std::stringstream str;
     for(const uint8_t pfx: prefixes)
     {
         switch(pfx)
         {
-        case 0xf3: str << "repe";  break;
+        case 0xf3: str << (repe?"repe":"rep");  break;
         case 0xf2: str << "repne"; break;
         default: break;
         }
@@ -197,9 +198,10 @@ std::string segOverrideStr(Segment override_, Segment default_)
 }
 
 Instruction insns[]={
-{0x6c, "ins", MEM8, "di", ES, REG16, "d", SEG_NONE},
-{0x6d, "ins", MEMW, "di", ES, REG16, "d", SEG_NONE},
-{0xa4, "movs", MEMW, "di", ES, MEMW, "si", DS}
+{0x6c, "ins", false, MEM8, "di", ES, REG16, "d", SEG_NONE},
+{0x6d, "ins", false, MEMW, "di", ES, REG16, "d", SEG_NONE},
+{0xa4, "movs", false, MEMW, "di", ES, MEMW, "si", DS},
+{0xa7, "cmps", true, MEMW, "di", ES, MEMW, "si", DS}
 };
 constexpr std::size_t insnCount=sizeof(insns)/sizeof(insns[0]);
 
@@ -226,7 +228,7 @@ int main()
                 line << ": 0x";
                 line << toHexString(address,true,':');
                 line << " " << hex;
-                line << "  " << prefixNames(prefixes) << " " << insn.mnemonic;
+                line << "  " << prefixNames(prefixes,insn.repe) << " " << insn.mnemonic;
 
                 std::size_t opNum=1;
                 for(const auto& operand: insn.operands)
