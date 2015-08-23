@@ -58,7 +58,7 @@ std::ostream& operator<<(std::ostream& str, Mode mode)
     return str;
 }
 
-std::ostream& operator<<(std::ostream& str, std::vector<uint8_t> vec)
+std::ostream& operator<<(std::ostream& str, const std::vector<uint8_t>& vec)
 {
     std::ostringstream stream;
     for(const uint8_t val: vec)
@@ -67,6 +67,16 @@ std::ostream& operator<<(std::ostream& str, std::vector<uint8_t> vec)
     adjusted << std::setw(20) << std::left << stream.str();
     str << adjusted.str();
     return str;
+}
+
+std::string toPythonHex(const std::vector<uint8_t>& vec)
+{
+    std::ostringstream stream;
+    stream << "b\"";
+    for(const uint8_t val: vec)
+        stream << std::hex << std::uppercase << "\\x" << (val&0xff);
+    stream << "\"";
+    return stream.str();
 }
 
 std::string toHexString(uint64_t val, bool fill=false, char sym='\0')
@@ -304,7 +314,10 @@ void generateMyFormat()
                 typeSizes.pop_back();
                 typeSizes.pop_back();
 
-                std::cout << line.str() << prefixNames(prefixes,insn.repe) << " "
+                const auto prefixNamesStr=prefixNames(prefixes,insn.repe);
+
+                std::cout << line.str()
+                          << prefixNamesStr << (prefixNamesStr.size()?" ":"")
                           << insn.mnemonic << mnemonicSuffix << " "
                           << opStrAligned.str()
                           << typeSizes << "\n";
@@ -313,8 +326,92 @@ void generateMyFormat()
     }
 }
 
+void generatePythonFormat()
+{
+    for(Mode mode: modes)
+    {
+        uint64_t address=0x649123ffe1ull;
+        if(mode==Use16) address&=0xffffull;
+        if(mode==Use32) address&=0xffffffffull;
+        for(std::size_t pfxSN=0;pfxSN<sizeof(prefixSets)/sizeof(prefixSets[0]);++pfxSN)
+        {
+            const std::vector<uint8_t>& prefixes=prefixSets[pfxSN];
+            if(prefixes.size() && prefixes.back()==0x48 && mode!=Use64)
+                continue;
+            for(const auto& insn: insns)
+            {
+                const std::size_t addrSize=addressSize(prefixes,mode);
+                std::vector<uint8_t> hex=prefixes; hex.push_back(insn.opcode);
+                std::ostringstream line;
+                line << "(CS_ARCH_X86, CS_MODE_" << mode << ", CS_OPT_SYNTAX_INTEL, 0x";
+                line << toHexString(address,false,0) << ", ";
+                line << toPythonHex(hex) << ", ";
+
+                std::size_t opNum=1;
+                std::stringstream typeSizesStream;
+                std::ostringstream opStream;
+                char mnemonicSuffix=0;
+                for(const auto& operand: insn.operands)
+                {
+                    std::size_t opSize=operandSize(prefixes,mode);
+                    std::string opName=regName(opSize, operand.string);
+                    switch(operand.type)
+                    {
+                    case REG8:
+                        opSize=8;
+                        opName=regName(opSize, operand.string);
+                        typeSizesStream<<"reg";
+                        break;
+                    case REG16:
+                        opSize=16;
+                        typeSizesStream<<"reg";
+                        opName=regName(opSize, operand.string);
+                        break;
+                    case REGW:
+                        typeSizesStream<<"reg";
+                        // all done
+                        break;
+                    case MEM8:
+                        opSize=8;
+                        // fall through
+                    case MEMW:
+                    {
+                        std::string seg=segOverrideStr(segmentOverride(prefixes),operand.seg,mode);
+                        opName=sizeName(opSize)+" ptr "+seg+"["+regName(addrSize,operand.string)+"]";
+                        typeSizesStream<<"mem";
+                        mnemonicSuffix=opName[0];
+                        break;
+                    }
+                    }
+                    opStream << opName << ", ";
+                    typeSizesStream << opSize << ", ";
+                    ++opNum;
+                }
+                std::string opString=opStream.str();
+                opString.pop_back();
+                opString.pop_back();
+                std::ostringstream opStrAligned;
+                opStrAligned << std::left << opString;
+
+                std::string typeSizes=typeSizesStream.str();
+                typeSizes.pop_back();
+                typeSizes.pop_back();
+
+                const auto prefixNamesStr=prefixNames(prefixes,insn.repe);
+
+                std::cout << line.str() << "\""
+                          << prefixNamesStr << (prefixNamesStr.size()?" ":"")
+                          << insn.mnemonic << mnemonicSuffix << " "
+                          << opStrAligned.str() << "\"),\n";
+            }
+        }
+    }
+}
 
 int main(int argc, char** argv)
 {
-    generateMyFormat();
+    if(argc>1)
+        generatePythonFormat();
+    else
+        generateMyFormat();
 }
