@@ -82,7 +82,8 @@ std::string toPythonHex(const std::vector<uint8_t>& vec)
 std::string toHexString(uint64_t val, bool fill=false, char sym='\0')
 {
     std::ostringstream str;
-    str << std::hex << val << sym;
+    str << std::hex << val;
+    if(sym) str << sym;
     std::ostringstream adjusted;
     if(fill) adjusted << std::setw(12) << std::left;
     adjusted << str.str();
