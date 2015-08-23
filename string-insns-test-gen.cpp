@@ -410,8 +410,16 @@ void generatePythonFormat()
 
 int main(int argc, char** argv)
 {
-    if(argc>1)
-        generatePythonFormat();
-    else
+    if(argc==1)
         generateMyFormat();
+    else if(argc==2)
+    {
+        if(argv[1]==std::string("-python"))
+            generatePythonFormat();
+        else
+        {
+            std::cerr << "Usage: " << argv[0] << " [-python]\n";
+            return 1;
+        }
+    }
 }
