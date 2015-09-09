@@ -1,0 +1,13 @@
+Intel16: 0xffe1:       0f 01 05                    sgdt [di] ; mem48
+Intel16: 0xffe1:       0f 01 0d                    sidt [di] ; mem48
+Intel32: 0xffe1:       0f 01 05 a0 90 04 08        sgdt [0x80490a0] ; mem48
+Intel32: 0xffe1:       0f 01 0d a0 90 04 08        sidt [0x80490a0] ; mem48
+Intel64: 0xffe1:       0f 01 05 a0 90 04 08        sgdt [rip+0x80490a0] ; mem80
+Intel64: 0xffe1:       0f 01 0d a0 90 04 08        sidt [rip+0x80490a0] ; mem80
+
+Intel16: 0xffe1:       0f 01 15                    lgdt [di] ; mem48
+Intel16: 0xffe1:       0f 01 1d                    lidt [di] ; mem48
+Intel32: 0xffe1:       0f 01 15 a0 90 04 08        lgdt [0x80490a0] ; mem48
+Intel32: 0xffe1:       0f 01 1d a0 90 04 08        lidt [0x80490a0] ; mem48
+Intel64: 0xffe1:       0f 01 15 a0 90 04 08        lgdt [rip+0x80490a0] ; mem80
+Intel64: 0xffe1:       0f 01 1d a0 90 04 08        lidt [rip+0x80490a0] ; mem80
