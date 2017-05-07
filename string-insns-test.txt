@@ -196,7 +196,7 @@ Intel32: 0x9123ffe1:       67 66 f3 6d     rep insw word ptr es:[di], dx       ;
 Intel32: 0x9123ffe1:       f3 6e           rep outsb dx, byte ptr [esi]      ; reg16, mem8
 Intel32: 0x9123ffe1:       f3 6f           rep outsd dx, dword ptr [esi]     ; reg16, mem32
 Intel32: 0x9123ffe1:       67 f3 6e        rep outsb dx, byte ptr [si]       ; reg16, mem8
-Intel32: 0x9123ffe1:       66 f3 6f        rep outsw dx, dword ptr [esi]     ; reg16, mem16
+Intel32: 0x9123ffe1:       66 f3 6f        rep outsw dx, word ptr [esi]      ; reg16, mem16
 Intel32: 0x9123ffe1:       67 f3 6f        rep outsd dx, dword ptr [si]      ; reg16, mem32
 Intel32: 0x9123ffe1:       67 66 f3 6f     rep outsw dx, word ptr [si]       ; reg16, mem16
 # LODS
