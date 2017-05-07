@@ -63,7 +63,6 @@ int main(void)
                         case X86_OP_REG:     printf("register ");  break;
                         case X86_OP_IMM:     printf("immediate"); break;
                         case X86_OP_MEM:     printf("memory   ");    break;
-                        case X86_OP_FP:      printf("floatg-pt"); break;
                         default:             printf(" (Error) ");
                         }
                         printf(", size: %d",op[k].size);
@@ -83,8 +82,6 @@ int main(void)
                                                                                                ,op[k].mem.scale
                                                                                                ,op[k].mem.disp);
                             break;
-                        case X86_OP_FP:
-                            printf("%g\n",op[k].fp);
                         default:
                             puts("");
                         }

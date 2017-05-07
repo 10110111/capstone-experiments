@@ -213,7 +213,6 @@ std::string formatOperandTypeSize(const std::pair<capstone::x86_op_type,std::siz
     else if(type==capstone::X86_OP_MEM)str="mem";
     else if(type==capstone::X86_OP_REG)str="reg";
     else if(type==capstone::X86_OP_IMM)str="imm";
-    else if(type==capstone::X86_OP_FP) str="fp";
     else str="(bad="+std::to_string(type)+")";
 
     return str+std::to_string(8*size);
