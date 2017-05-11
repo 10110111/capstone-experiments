@@ -122,6 +122,11 @@ std::size_t operandSize(const std::vector<uint8_t>& prefixes, Mode mode)
     return 0;
 }
 
+bool isInOutInsn(std::string const& mnemonic)
+{
+    return mnemonic=="ins" || mnemonic=="outs";
+}
+
 std::string segName(Segment seg)
 {
     switch(seg)
@@ -266,6 +271,8 @@ void generateMyFormat()
                 continue;
             for(const auto& insn: insns)
             {
+                if(prefixes.size()  && prefixes.back()==0x48 && isInOutInsn(insn.mnemonic))
+                    continue; // These should have special treatment, which we'll not do for now
                 const std::size_t addrSize=addressSize(prefixes,mode);
                 std::vector<uint8_t> hex=prefixes; hex.push_back(insn.opcode);
                 std::ostringstream line;
@@ -351,6 +358,8 @@ void generatePythonFormat()
                 continue;
             for(const auto& insn: insns)
             {
+                if(prefixes.size()  && prefixes.back()==0x48 && isInOutInsn(insn.mnemonic))
+                    continue; // These should have special treatment, which we'll not do for now
                 const std::size_t addrSize=addressSize(prefixes,mode);
                 std::vector<uint8_t> hex=prefixes; hex.push_back(insn.opcode);
                 std::ostringstream line;
