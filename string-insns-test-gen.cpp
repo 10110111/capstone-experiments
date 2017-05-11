@@ -226,19 +226,32 @@ Instruction insns[]={
 {0xaf, "scas", true, REGW, "a", SEG_NONE, MEMW, "di", ES}
 };
 const Mode modes[]={Use16,Use32,Use64};
-const std::vector<uint8_t> prefixSets[]{{0xf3,0x48},
-                                        {0x48},
-                                        {0x66,0x48},
-                                        {0x66,0x67,0x48},
-                                        {0x66,0x67,0xf2,0x48},
-                                        {0x67,0xf3},
-                                        {0x66,0xf2},
-                                        {0x66,0x67,0xf3},
-                                        {0xf3},
-                                        {},
-                                        {0x66},
-                                        {0x67},
-                                        {0x66,0x67}};
+const std::vector<uint8_t> prefixSets[]{
+                                       {},
+                                       {0x66},
+                                       {0x67},
+                                       {0xf2},
+                                       {0xf3},
+                                       {0x66, 0x67},
+                                       {0x66, 0xf2},
+                                       {0x66, 0xf3},
+                                       {0x67, 0xf2},
+                                       {0x67, 0xf3},
+                                       {0x66, 0x67, 0xf2},
+                                       {0x66, 0x67, 0xf3},
+                                       {0x48},
+                                       {0x66, 0x48},
+                                       {0x67, 0x48},
+                                       {0xf2, 0x48},
+                                       {0xf3, 0x48},
+                                       {0x66, 0x67, 0x48},
+                                       {0x66, 0xf2, 0x48},
+                                       {0x66, 0xf3, 0x48},
+                                       {0x67, 0xf2, 0x48},
+                                       {0x67, 0xf3, 0x48},
+                                       {0x66, 0x67, 0xf2, 0x48},
+                                       {0x66, 0x67, 0xf3, 0x48},
+                                       };
 
 void generateMyFormat()
 {
