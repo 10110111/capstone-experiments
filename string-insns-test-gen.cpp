@@ -225,7 +225,6 @@ Instruction insns[]={
 {0xae, "scas", true, REG8, "a", SEG_NONE, MEM8, "di", ES},
 {0xaf, "scas", true, REGW, "a", SEG_NONE, MEMW, "di", ES}
 };
-constexpr std::size_t insnCount=sizeof(insns)/sizeof(insns[0]);
 const Mode modes[]={Use16,Use32,Use64};
 const std::vector<uint8_t> prefixSets[]{{0xf3,0x48},
                                         {0x48},
@@ -248,9 +247,8 @@ void generateMyFormat()
         uint64_t address=0x649123ffe1ull;
         if(mode==Use16) address&=0xffffull;
         if(mode==Use32) address&=0xffffffffull;
-        for(std::size_t pfxSN=0;pfxSN<sizeof(prefixSets)/sizeof(prefixSets[0]);++pfxSN)
+        for(const auto& prefixes : prefixSets)
         {
-            const std::vector<uint8_t>& prefixes=prefixSets[pfxSN];
             if(prefixes.size() && prefixes.back()==0x48 && mode!=Use64)
                 continue;
             for(const auto& insn: insns)
@@ -334,9 +332,8 @@ void generatePythonFormat()
         uint64_t address=0x649123ffe1ull;
         if(mode==Use16) address&=0xffffull;
         if(mode==Use32) address&=0xffffffffull;
-        for(std::size_t pfxSN=0;pfxSN<sizeof(prefixSets)/sizeof(prefixSets[0]);++pfxSN)
+        for(const auto& prefixes : prefixSets)
         {
-            const std::vector<uint8_t>& prefixes=prefixSets[pfxSN];
             if(prefixes.size() && prefixes.back()==0x48 && mode!=Use64)
                 continue;
             for(const auto& insn: insns)
